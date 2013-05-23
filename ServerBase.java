@@ -41,7 +41,6 @@ public class ServerBase {
     public String getPassword() {return pass;}
 
     public String connect() throws IOException {
-        String end;
         server = new Socket(ip, port);
         input = new BufferedReader(new InputStreamReader(server.getInputStream()));
         output = new DataOutputStream(server.getOutputStream());
@@ -51,8 +50,7 @@ public class ServerBase {
         digest = md5(digest);
         output.writeBytes("login "+digest+"\n"); //send it to the server
         input.readLine(); //blank line is output here
-        end = input.readLine();
-        return end;  //this will tell you if it failed, or succeeded, from the server.
+        return input.readLine(); //this will tell you if it failed, or succeeded, from the server.
     }
 
     private void send(String command) throws IOException {
