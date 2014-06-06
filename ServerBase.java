@@ -88,7 +88,6 @@ public class ServerBase {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        name = s;
         return s;
     }
 
@@ -125,7 +124,7 @@ public class ServerBase {
                 }
             }
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return players;
     }
