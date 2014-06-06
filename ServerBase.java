@@ -50,21 +50,20 @@ public class ServerBase {
         digest = md5(digest);
         output.writeBytes("login "+digest+"\n"); //send it to the server
         input.readLine(); //blank line is output here
-        return input.readLine(); //this will tell you if it failed, or succeeded, from the server.
+        return input.readLine();  //this will tell you if it failed, or succeeded, from the server.
     }
 
     private void send(String command) throws IOException {
-        output.writeBytes(command+"\n");
+        output.writeBytes("\u0002"+command+"\n");
     }
 
     private String recv() throws IOException {
-        String r = input.readLine();
-        String line;
-        while (input.ready()) {
-            line = input.readLine();
-            r += "\n" + line;
+        StringBuffer line = new StringBuffer();
+        int myChar;
+        while ((myChar = input.read()) != 4) {
+            line.append((char)myChar);
         }
-        return r;
+        return line.toString();
     }
 
     public String query(String command) throws IOException {
@@ -81,6 +80,65 @@ public class ServerBase {
             System.out.println("IO Exception");
         }
     }
+	
+	public String getServerName() {
+        String s = "";
+        try{
+            s = this.query("exec sv.serverName");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        name = s;
+        return s;
+    }
+
+    public LinkedList<Player> getPlayers() {
+        String res;
+        LinkedList<Player> players = null;
+        try {
+            res = this.query("bf2cc pl");
+            players = new LinkedList<Player>();
+            String[] rows = res.split("\\r");
+            for (int i = 0; i<rows.length; i++) {
+                if (rows[i].length() > 3) {
+                    String[] playerAtt = rows[i].split("\\t");
+                    players.add(
+                            new Player(
+                                    Integer.parseInt(playerAtt[0]),
+                                    playerAtt[1],
+                                    playerAtt[34],
+                                    Integer.parseInt(playerAtt[4]),
+                                    Integer.parseInt(playerAtt[8]),
+                                    Integer.parseInt(playerAtt[31]),
+                                    Integer.parseInt(playerAtt[36]),
+                                    Integer.parseInt(playerAtt[30]),
+                                    Integer.parseInt(playerAtt[2]),
+                                    Integer.parseInt(playerAtt[39]),
+                                    Integer.parseInt(playerAtt[37]),
+                                    Integer.parseInt(playerAtt[3]),
+                                    playerAtt[18],
+                                    playerAtt[47],
+                                    Integer.parseInt(playerAtt[46]),
+                                    Integer.parseInt(playerAtt[10])
+                            )
+                    );
+                }
+            }
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+        return players;
+    }
+
+    public void kickPlayer(int id, String reason) {
+        try {
+            this.query("kick "+id+" \""+reason+"\"");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+	
 
     private static String md5(String md5) {
         /*
